@@ -231,6 +231,8 @@ local function html()
   ]] .. table.concat(body) .. [[</div><script>
   const v=document.getElementById('v'),post=m=>webkit.messageHandlers.sm.postMessage(m);
   v.addEventListener('input',()=>{v.style.setProperty('--v',v.value+'%');post({vol:+v.value})});
+  let dragging=false;v.addEventListener('pointerdown',()=>dragging=true);addEventListener('pointerup',()=>dragging=false);
+  function setV(n){if(dragging)return;v.value=n;v.style.setProperty('--v',n+'%')}
   function go(i){post({row:i})}
   document.addEventListener('keydown',e=>{if(e.key==='Escape')post({close:1})});
   </script></body></html>]]
@@ -276,6 +278,15 @@ local function showPop()
   end):start()
 end
 item:setClickCallback(showPop)
+-- keep the open slider on the system volume (volume keys, other apps)
+function M.syncPop()
+  if not (pop and pop:isVisible()) then return end
+  local d = hs.audiodevice.defaultOutputDevice()
+  local v = d and d:outputVolume() and math.floor(d:outputVolume() + 0.5) or 0
+  if d and d:outputMuted() then v = 0 end
+  pop:evaluateJavaScript("setV(" .. v .. ")")
+end
+M.syncTimer = hs.timer.doEvery(0.25, M.syncPop)
 M.showPop, M.hidePop = showPop, hidePop
 
 -- Watchers: icon follows output device, volume and mute; AirPods options are re-read when AirPods take over
