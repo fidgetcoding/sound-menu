@@ -45,10 +45,16 @@ end
 
 local function render()
   local d = hs.audiodevice.defaultOutputDevice()
-  if isAirPods(d) then item:setIcon(I["sound-airpods"], true)
+  -- the icon shows what's playing: AirPods, headphones, the audio interface, AirPlay or a display get their
+  -- own icon; plain speakers show the volume level. Muted always shows the mute icon. (Nate 2026-11-09)
+  local v, muted = d and d:outputVolume() or 0, d and d:outputMuted()
+  local speakers = not d or (d:transportType() == "Built-in" and not d:name():lower():find("headphone"))
+  if muted then item:setIcon(I["sound-mute"], true)
+  elseif isAirPods(d) then item:setIcon(I["sound-airpods"], true)
+  elseif d and d:name():lower():find("headphone") then item:setIcon(D["dev-headphones"], true)
+  elseif not speakers and deviceIcon(d) ~= D["dev-speaker"] then item:setIcon(deviceIcon(d), true)
   else
-    local v, muted = d and d:outputVolume() or 0, d and d:outputMuted()
-    local n = (muted or v == 0) and "sound-mute" or v < 34 and "sound-1" or v < 67 and "sound-2" or "sound-3"
+    local n = v == 0 and "sound-mute" or v < 34 and "sound-1" or v < 67 and "sound-2" or "sound-3"
     item:setIcon(I[n], true)
   end
   item:setTooltip(d and ("Sound: " .. d:name()) or "Sound")
