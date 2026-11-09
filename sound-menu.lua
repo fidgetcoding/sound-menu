@@ -16,7 +16,7 @@ end
 
 -- icon per output device: brand logo when we have one, else a symbol for the kind of device
 local D = {}
-for _, n in ipairs({"dev-builtin","dev-airpods","dev-headphones","dev-speaker","dev-airplay","dev-display","dev-ua"}) do D[n] = icon(n, 20) end
+for _, n in ipairs({"dev-builtin","dev-airpods","dev-headphones","dev-speaker","dev-airplay","dev-display","dev-ua","dev-interface"}) do D[n] = icon(n, 20) end
 local function deviceIcon(d)
   local n, t = d:name():lower(), d:transportType()
   if n:find("apollo") or n:find("universal audio") then return D["dev-ua"] end
@@ -52,6 +52,7 @@ local function render()
   if muted then item:setIcon(I["sound-mute"], true)
   elseif isAirPods(d) then item:setIcon(I["sound-airpods"], true)
   elseif d and d:name():lower():find("headphone") then item:setIcon(D["dev-headphones"], true)
+  elseif deviceIcon(d) == D["dev-ua"] then item:setIcon(D["dev-interface"], true)   -- generic interface symbol in the bar, not the UA logo
   elseif not speakers and deviceIcon(d) ~= D["dev-speaker"] then item:setIcon(deviceIcon(d), true)
   else
     local n = v == 0 and "sound-mute" or v < 34 and "sound-1" or v < 67 and "sound-2" or "sound-3"
