@@ -1,6 +1,6 @@
 <a id="top"></a>
 
-<!-- banner goes here once Nate picks one -->
+![fidgetcoding / sound-menu](assets/banner.png)
 
 # sound-menu
 
